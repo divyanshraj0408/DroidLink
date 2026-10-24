@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key><string>dev.droidlink.mac</string>
+    <key>CFBundleName</key><string>DroidLink</string>
+    <key>CFBundleExecutable</key><string>DroidLink</string>
+    <key>CFBundleIconFile</key><string>AppIcon</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleShortVersionString</key><string>1.0</string>
+    <key>CFBundleVersion</key><string>1</string>
+    <key>LSMinimumSystemVersion</key><string>14.0</string>
+    <key>LSUIElement</key><true/>
+    <key>NSLocalNetworkUsageDescription</key><string>DroidLink talks to your Android phone on this network.</string>
+    <key>NSBonjourServices</key><array><string>_droidlink._tcp</string></array>
+</dict>
+</plist>
