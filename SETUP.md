@@ -1,27 +1,34 @@
 # Setup guide
 
-From a fresh clone to a paired phone and Mac. Takes about 15 minutes, most of it downloads.
+Source: <https://github.com/divyanshraj0408/DroidLink>
+
+From nothing to a paired phone and Mac in about 15 minutes, most of it downloads. There are two ways:
+let an AI agent do it, or paste four blocks yourself.
 
 ## Let an AI agent do it
 
 If you use an AI coding agent that can run terminal commands (Claude Code, Cursor, Codex, etc.),
-clone the repo, open the agent in the `droidlink` folder, and paste this:
+open it in any folder and paste this. It clones the repo itself.
 
 ```text
-Set up DroidLink on this Mac by following SETUP.md in this repo. Work through it step by step:
+Set up DroidLink (https://github.com/divyanshraj0408/DroidLink) on this Mac and my Android phone.
+Work through it step by step:
 
-1. Check the prerequisites first: macOS 14+, Xcode Command Line Tools, a JDK between 17 and 25,
+1. If this folder isn't already the DroidLink repo, clone
+   https://github.com/divyanshraj0408/DroidLink.git into ~/DroidLink and work there. SETUP.md in
+   the repo is the reference for every step below.
+2. Check the prerequisites: macOS 14+, Xcode Command Line Tools, Homebrew, a JDK between 17 and 25,
    the Android SDK, and adb. Report what is installed and what is missing. Ask me before you
    install anything, and prefer Homebrew or Android Studio's bundled tools.
-2. Build the Mac app with mac/build.sh and open mac/build/DroidLink.app.
-3. Create android/local.properties pointing at my Android SDK if it doesn't exist, set JAVA_HOME
+3. Build the Mac app with mac/build.sh and open mac/build/DroidLink.app.
+4. Create android/local.properties pointing at my Android SDK if it doesn't exist, set JAVA_HOME
    for the build, and run ./gradlew assembleDebug test in android/.
-4. Check `adb devices`. If no phone shows up, tell me how to turn on USB debugging and wait
+5. Check `adb devices`. If no phone shows up, tell me how to turn on USB debugging and wait
    until I've plugged it in and accepted the prompt. Then install the APK with adb install -r.
-5. Walk me through pairing (scanning the QR code, granting the SMS, phone, contacts and
+6. Walk me through pairing (scanning the QR code, granting the SMS, phone, contacts and
    notification permissions on the phone, and the Mac's notification and Local Network prompts).
    I have to do those taps myself, so tell me exactly what to tap and wait for me to confirm.
-6. Ask whether I want camera and screen mirroring. If yes, install scrcpy with Homebrew.
+7. Ask whether I want camera and screen mirroring. If yes, install scrcpy with Homebrew.
 
 Rules: don't change source code to get past an error. Show me the exact error and suggest a fix.
 Never print, copy, or upload the contents of ~/Library/Application Support/DroidLink/key or the
@@ -29,70 +36,63 @@ pairing QR code. When you're done, tell me how to check that it works: a test SM
 should land on the Mac clipboard.
 ```
 
-The agent can build and install everything. You still have to scan the QR code and tap the
+The agent can install, build and copy everything over. You still scan the QR code and tap the
 permission prompts on both devices yourself.
 
 ## What you need
 
 | | Requirement |
 |---|---|
-| Mac | macOS 14 (Sonoma) or newer, Xcode Command Line Tools (`xcode-select --install`) |
-| Phone | Android 14 or newer, a USB cable for the first install |
+| Mac | macOS 14 (Sonoma) or newer |
+| Phone | Android 14 or newer, and a USB cable for the first install |
 | Both | On the same Wi-Fi network |
-| Android build | JDK 17–25 and the Android SDK (easiest: install [Android Studio](https://developer.android.com/studio)) |
-| Optional | [Homebrew](https://brew.sh) + `brew install scrcpy` for Phone Camera / Mirror Phone Screen |
 
-## 1. Get the code
+Everything else is installed in step 1.
 
-```sh
-git clone https://github.com/<you>/droidlink.git
-cd droidlink
-```
-
-## 2. Build and open the Mac app
+## 1. Install the tools (once)
 
 ```sh
-mac/build.sh
-open mac/build/DroidLink.app
+xcode-select --install          # git, Swift and the Mac build tools; skip if already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"   # Homebrew, if you don't have it
+brew install --cask android-studio
 ```
 
-The app is ad-hoc signed, so the first launch may be blocked. If macOS says it can't verify the
-developer, go to System Settings → Privacy & Security and click **Open Anyway**.
+Open **Android Studio** once and click through its setup wizard with the standard options. That
+downloads the Android SDK and adb to `~/Library/Android/sdk`. You don't need to open a project.
 
-DroidLink lives in the menu bar (no Dock icon). On first run it creates its encryption key in
-`~/Library/Application Support/DroidLink/key` and shows a pairing QR code.
+## 2. Turn on USB debugging on the phone
 
-When macOS asks, allow **Local Network** access and **Notifications**. If you missed the prompts:
-System Settings → Privacy & Security → Local Network, and System Settings → Notifications → DroidLink.
+1. Settings → About phone → tap **Build number** seven times until it says you're a developer.
+2. Settings → System → Developer options → turn on **USB debugging**.
+3. Plug the phone into the Mac and tap **Allow** on the "Allow USB debugging?" prompt.
 
-Optional: add `DroidLink.app` under System Settings → General → Login Items to start it at login.
-Move it to `/Applications` first if you want it to survive a `git clean`.
+## 3. Download, build and install
 
-## 3. Build and install the Android app
-
-Tell Gradle where the SDK is. Android Studio does this for you when you open the `android/` folder;
-otherwise create `android/local.properties`:
-
-```properties
-sdk.dir=/Users/<you>/Library/Android/sdk
-```
-
-Make sure `JAVA_HOME` points at JDK 17–25. Android Studio's bundled JDK works:
+Paste this whole block into Terminal:
 
 ```sh
+git clone https://github.com/divyanshraj0408/DroidLink.git ~/DroidLink && cd ~/DroidLink
+
+# Mac app → menu bar
+mac/build.sh && open mac/build/DroidLink.app
+
+# Phone app → over USB
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+echo "sdk.dir=$HOME/Library/Android/sdk" > android/local.properties
+(cd android && ./gradlew assembleDebug)
+~/Library/Android/sdk/platform-tools/adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Enable USB debugging on the phone (Settings → About phone → tap **Build number** 7 times, then
-Settings → System → Developer options → **USB debugging**), plug it in, and run:
+The first Gradle build downloads a few hundred MB, so give it a few minutes.
 
-```sh
-cd android
-./gradlew assembleDebug
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-```
+On the Mac, DroidLink appears in the menu bar (no Dock icon) and shows a pairing QR code. When macOS
+asks, allow **Local Network** access and **Notifications**. If the app is blocked as being from an
+unidentified developer, go to System Settings → Privacy & Security and click **Open Anyway**.
 
-`adb` is in `~/Library/Android/sdk/platform-tools/` if it isn't on your `PATH`.
+Optional: move `mac/build/DroidLink.app` to `/Applications` and add it under System Settings → General →
+Login Items so it starts at login.
+
+To update later: `cd ~/DroidLink && git pull`, then run the block again from `mac/build.sh` on.
 
 ## 4. Pair
 

@@ -1,0 +1,122 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Follows the system appearance, like the app itself. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-heading: var(--font-bricolage), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Product colors: the app icon's graphite and aluminium, and the system colors the app uses. */
+  --color-graphite: var(--graphite);
+  --color-aluminium: var(--aluminium);
+  --color-signal: #34c759;
+  --color-decline: #ff3b30;
+  --color-sent: #007aff;
+  --color-material: var(--material);
+  --color-material-line: var(--material-line);
+}
+
+:root {
+  --background: #e9eaed;
+  --foreground: #17181b;
+  --card: #f6f7f8;
+  --card-foreground: #17181b;
+  --popover: #f6f7f8;
+  --popover-foreground: #17181b;
+  --primary: #1f2023;
+  --primary-foreground: #f4f5f7;
+  --secondary: #dcdee2;
+  --secondary-foreground: #17181b;
+  --muted: #dfe1e5;
+  --muted-foreground: #5b5e66;
+  --accent: #dcdee2;
+  --accent-foreground: #17181b;
+  --destructive: #d70015;
+  --border: rgb(23 24 27 / 0.1);
+  --input: rgb(23 24 27 / 0.14);
+  --ring: #8e9198;
+  --radius: 0.625rem;
+
+  --graphite: #1f2023;
+  --aluminium: #c9ccd1;
+  --material: rgb(246 246 248 / 0.78);
+  --material-line: rgb(0 0 0 / 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a1b1e;
+    --foreground: #ecedef;
+    --card: #232427;
+    --card-foreground: #ecedef;
+    --popover: #2a2b2f;
+    --popover-foreground: #ecedef;
+    --primary: #e6e7ea;
+    --primary-foreground: #1a1b1e;
+    --secondary: #2c2d31;
+    --secondary-foreground: #ecedef;
+    --muted: #2c2d31;
+    --muted-foreground: #9a9da5;
+    --accent: #34363b;
+    --accent-foreground: #ecedef;
+    --destructive: #ff6961;
+    --border: rgb(255 255 255 / 0.09);
+    --input: rgb(255 255 255 / 0.14);
+    --ring: #6b6e76;
+
+    --graphite: #0f1012;
+    --aluminium: #3a3c41;
+    --material: rgb(44 44 48 / 0.72);
+    --material-line: rgb(255 255 255 / 0.1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scroll-padding-top: 3rem;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* macOS translucent material: banners, menus, the call card. */
+@utility material {
+  background: var(--material);
+  backdrop-filter: blur(28px) saturate(1.8);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  box-shadow: 0 0 0 0.5px var(--material-line), 0 10px 30px -8px rgb(0 0 0 / 0.28);
+}

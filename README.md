@@ -17,6 +17,8 @@ cd android && ./gradlew assembleDebug         # → app/build/outputs/apk/debug/
 adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
+The landing page lives in `web/` (Next.js): `cd web && npm install && npm run dev`.
+
 Android builds need JDK 17–25 (`JAVA_HOME`). Camera and mirroring need `brew install scrcpy`.
 
 ## Set up
