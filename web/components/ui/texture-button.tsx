@@ -100,7 +100,9 @@ const TextureButton = React.forwardRef<HTMLButtonElement, UnifiedButtonProps>(
 
     if (href) {
       return (
-        <a href={href} className={outer} ref={ref as React.Ref<HTMLAnchorElement>} {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+        // <a> is inline, unlike <button>; without inline-flex the inner layer can't size itself to the
+        // label outside a flex row (it blew up to a huge box in the setup steps).
+        <a href={href} className={cn("inline-flex", outer)} ref={ref as React.Ref<HTMLAnchorElement>} {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
           <span className={inner}>{children}</span>
         </a>
       )
