@@ -60,8 +60,8 @@ import javax.crypto.spec.SecretKeySpec;
  */
 final class Link {
     static final int PORT = 47821;
-    static final int MAX_FILE = 50 << 20;
-    private static final int MAX_FRAME = 80 << 20;
+    // Files stream over their own connection (Transfers); Link frames are messages only.
+    private static final int MAX_FRAME = 16 << 20;
     private static final String TAG = "DroidLink";
     private static Link instance;
 
@@ -198,7 +198,7 @@ final class Link {
             case "clip" -> main.post(() -> ctx.getSystemService(ClipboardManager.class)
                     .setPrimaryClip(ClipData.newPlainText("Mac", m.optString("text"))));
             case "reply" -> Listener.reply(m.optString("id"), m.optString("text"));
-            case "file" -> saveFile(m.optString("name"), Base64.decode(m.optString("data"), Base64.DEFAULT));
+            case "xfer_offer", "xfer_accept", "xfer_reject", "xfer_cancel" -> Transfers.handle(ctx, m);
             case "sms_threads" -> send(Sms.threads(ctx));
             case "sms_thread" -> send(Sms.thread(ctx, m.optLong("thread")));
             case "contacts" -> send(Sms.contacts(ctx));
@@ -208,31 +208,6 @@ final class Link {
             case "call_dial" -> CallReceiver.dial(ctx, m.optString("number"));
             default -> { }
         }
-    }
-
-    private void saveFile(String name, byte[] data) {
-        name = new File(name).getName();
-        ContentResolver r = ctx.getContentResolver();
-        ContentValues v = new ContentValues();
-        v.put(MediaStore.Downloads.DISPLAY_NAME, name.isEmpty() ? "file" : name);
-        Uri uri = r.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
-        if (uri == null) return;
-        try (OutputStream o = r.openOutputStream(uri)) {
-            o.write(data);
-        } catch (IOException | NullPointerException e) {
-            Log.w(TAG, "save failed", e);
-            return;
-        }
-        Intent view = new Intent(Intent.ACTION_VIEW).setDataAndType(uri, r.getType(uri))
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-        NotificationManager nm = ctx.getSystemService(NotificationManager.class);
-        nm.createNotificationChannel(new NotificationChannel("files", "Files from Mac", NotificationManager.IMPORTANCE_DEFAULT));
-        nm.notify(uri.hashCode(), new Notification.Builder(ctx, "files")
-                .setSmallIcon(android.R.drawable.stat_sys_download_done)
-                .setContentTitle("Received " + name)
-                .setContentIntent(PendingIntent.getActivity(ctx, uri.hashCode(), view, PendingIntent.FLAG_IMMUTABLE))
-                .setAutoCancel(true)
-                .build());
     }
 
     /** The Mac's IP can change; look it up over Bonjour and remember the new one. */
@@ -313,7 +288,7 @@ final class Link {
         if (r != null) main.post(r);
     }
 
-    private SecretKeySpec key() {
+    SecretKeySpec key() {
         String k = prefs.getString("key", null);
         return k == null ? null : new SecretKeySpec(Base64.decode(k, Base64.DEFAULT), "AES");
     }

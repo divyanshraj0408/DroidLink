@@ -43,7 +43,7 @@ and pair with host `127.0.0.1`.
 | Messages | Menu → Messages…: SMS conversations with history, replies, and new messages (⌘N, contact suggestions). Plain SMS only; RCS chats live inside Google Messages, so reply to those from the banner. |
 | Clipboard Mac → phone | Automatic. Password-manager copies are skipped. |
 | Clipboard phone → Mac | Quick Settings tile, the app button, or Share → Send to Mac (Android blocks background clipboard reads). |
-| Files | Phone: Share → Send to Mac (lands in ~/Downloads). Mac: menu → Send File to Phone… (lands in phone Downloads). 50 MB max. |
+| Files | Phone: Share → Send to Mac (lands in ~/Downloads). Mac: Share → DroidLink from Photos, Finder and other apps, or menu → Send File to Phone… (lands in phone Downloads). Any size: files stream in encrypted 1 MiB chunks over their own connection (port 47822), LocalSend-style, with progress and Cancel on both sides and a SHA-256 check. |
 | Camera / mirror | Menu → Phone Camera / Mirror Phone Screen (scrcpy). Runs over Wi-Fi; after each phone restart, plug in USB once and DroidLink switches adb to Wi-Fi again. |
 
 ## Not done

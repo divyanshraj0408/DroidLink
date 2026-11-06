@@ -5,17 +5,14 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
-import android.util.Base64;
 import android.widget.Toast;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * Invisible activity behind "Share → Send to Mac" and the Quick Settings tile.
@@ -26,6 +23,12 @@ public class SendActivity extends Activity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         Intent i = getIntent();
+        if (Intent.ACTION_SEND_MULTIPLE.equals(i.getAction())) {
+            ArrayList<Uri> files = i.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri.class);
+            if (files != null) files.forEach(this::sendFile);
+            finish();
+            return;
+        }
         if (!Intent.ACTION_SEND.equals(i.getAction())) return;
         Uri file = i.getParcelableExtra(Intent.EXTRA_STREAM, Uri.class);
         String text = i.getStringExtra(Intent.EXTRA_TEXT);
@@ -36,7 +39,8 @@ public class SendActivity extends Activity {
 
     @Override
     public void onWindowFocusChanged(boolean focus) {
-        if (focus && !Intent.ACTION_SEND.equals(getIntent().getAction())) {
+        String action = getIntent().getAction();
+        if (focus && !Intent.ACTION_SEND.equals(action) && !Intent.ACTION_SEND_MULTIPLE.equals(action)) {
             sendClipboard(this);
             finish();
         }
@@ -60,21 +64,12 @@ public class SendActivity extends Activity {
                 Toast.LENGTH_SHORT).show();
     }
 
-    // ponytail: reads the whole file on the main thread; move to a background thread if 50 MB shares stutter.
+    /** Streams in the background (Transfers); the notification shows progress and has Cancel. */
     private void sendFile(Uri uri) {
-        String name = "file";
-        try (Cursor c = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
-            if (c != null && c.moveToFirst() && c.getString(0) != null) name = c.getString(0);
-        }
-        try (InputStream in = getContentResolver().openInputStream(uri)) {
-            if (in == null) throw new IOException("no stream");
-            byte[] data = in.readNBytes(Link.MAX_FILE + 1);
-            if (data.length > Link.MAX_FILE) {
-                Toast.makeText(this, "File too big (50 MB max)", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            send(this, Link.msg("file", "name", name, "data", Base64.encodeToString(data, Base64.NO_WRAP)));
+        try {
+            Transfers.offer(this, uri);
         } catch (IOException | SecurityException e) {
+            android.util.Log.w("DroidLink", "can't read shared file " + uri, e);
             Toast.makeText(this, "Couldn't read file", Toast.LENGTH_SHORT).show();
         }
     }

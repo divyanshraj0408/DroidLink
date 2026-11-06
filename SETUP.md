@@ -135,6 +135,7 @@ DroidLink switches adb to Wi-Fi, so you can unplug afterwards. Repeat the USB st
 | No Mac banners | System Settings → Notifications → DroidLink → allow. |
 | A row in the app says Off | Tap it to grant the permission. If Android stops asking, grant it in Settings → Apps → DroidLink → Permissions. |
 | Call card doesn't appear | Phone and call log permissions must be allowed on the phone, and the **Calls** row in the app must say On. |
+| DroidLink missing from the Share menu | Open DroidLink once, then Share → Edit Extensions… (or System Settings → General → Login Items & Extensions → Sharing) and turn on DroidLink. |
 | "scrcpy not found" | `brew install scrcpy` |
 | "Plug the phone in once" | Connect by USB with USB debugging on, accept the prompt on the phone, retry. |
 | Want a new key | Quit DroidLink, delete `~/Library/Application Support/DroidLink/key`, reopen, and re-pair the phone. |

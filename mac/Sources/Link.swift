@@ -6,8 +6,8 @@ import Network
 /// AES-GCM(nonce | ciphertext | tag) of a JSON object. The phone connects to us.
 final class Link {
     static let port: NWEndpoint.Port = 47821
-    static let maxFile = 50 << 20
-    static let maxFrame = 80 << 20
+    // Files stream over their own connection (Transfers); Link frames are messages only.
+    static let maxFrame = 16 << 20
 
     var onMessage: (([String: Any]) -> Void)?
     var onState: ((Bool) -> Void)?

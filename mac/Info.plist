@@ -12,6 +12,11 @@
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>LSUIElement</key><true/>
     <key>NSLocalNetworkUsageDescription</key><string>DroidLink talks to your Android phone on this network.</string>
+    <!-- droidlink://outbox: the Share menu extension asking us to send what it copied. -->
+    <key>CFBundleURLTypes</key><array><dict>
+        <key>CFBundleURLName</key><string>dev.droidlink.mac</string>
+        <key>CFBundleURLSchemes</key><array><string>droidlink</string></array>
+    </dict></array>
     <key>NSBonjourServices</key><array><string>_droidlink._tcp</string></array>
 </dict>
 </plist>

@@ -16,7 +16,8 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifica
     }
 
     let support = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/DroidLink")
-    let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+    // Variable width: a transfer shows its percentage next to the icon.
+    let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     let pasteboard = NSPasteboard.general
     var freshKey = false
     lazy var key = loadKey()
@@ -29,6 +30,10 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifica
     var messagesWindow: NSWindow?
     lazy var messages = Messages { [weak self] in self?.link.send($0) }
     lazy var calls = Calls { [weak self] in self?.link.send($0) }
+    lazy var transfers = Transfers(key: key, send: { [weak self] in self?.link.send($0) },
+                                   destination: { [weak self] in self?.downloadURL($0) ?? URL(fileURLWithPath: NSTemporaryDirectory()) })
+    /// Share-extension files wait here until sent: the extension's outbox is emptied on every share.
+    var staging: URL { support.appendingPathComponent("Outgoing") }
     var keypadWindow: NSWindow?
     var notificationsOff = false
 
@@ -54,11 +59,15 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifica
             if !up { phone = nil }
             item.button?.appearsDisabled = !up
             messages.connected = up
-            if !up { calls.disconnected() }
+            if !up { calls.disconnected(); transfers.linkDown() }
             if up, messagesWindow?.isVisible == true { messages.refresh(); messages.loadContacts() }
+            if up { sendOutbox() }
         }
         link.onMessage = { [weak self] m in self?.handle(m) }
         do { try link.start() } catch { notify("DroidLink can't listen on port \(Link.port)", "\(error)") }
+        do { try transfers.start() } catch { notify("DroidLink can't listen on port \(Transfers.port)", "\(error)") }
+        transfers.onChange = { [weak self] in self?.showTransferProgress() }
+        transfers.onFinished = { [weak self] in self?.transferFinished($0) }
 
         lastChange = pasteboard.changeCount
         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in self?.watchClipboard() }
@@ -98,15 +107,8 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifica
             messages.handle(m)
         case "sms_changed":
             if messagesWindow?.isVisible == true { messages.handle(m) }
-        case "file":
-            guard let data = Data(base64Encoded: s("data")) else { return }
-            let url = downloadURL(s("name"))
-            do {
-                try data.write(to: url)
-                notify("Received \(url.lastPathComponent)", "Saved to Downloads", path: url.path)
-            } catch {
-                notify("Couldn't save \(url.lastPathComponent)", "\(error)")
-            }
+        case "xfer_offer", "xfer_reject", "xfer_cancel":
+            transfers.handle(m)
         default:
             break
         }
@@ -148,6 +150,16 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifica
             menu.addItem(.separator())
             for r in recent {
                 add(menu, String("\(r.line) — \(r.text)".prefix(70))) { [weak self] in self?.copy(r.text) }
+            }
+        }
+        if !transfers.items.isEmpty {
+            menu.addItem(.separator())
+            for t in transfers.items {
+                let pct = t.size > 0 ? " \(t.bytes * 100 / t.size)%" : ""
+                let state = t.active ? pct : " waiting"
+                add(menu, "\(t.incoming ? "↓" : "↑") \(t.name.prefix(40)) —\(state) · Cancel") { [weak self] in
+                    self?.transfers.cancel(t.id)
+                }
             }
         }
         menu.addItem(.separator())
@@ -208,9 +220,76 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifica
         guard link.isConnected else { return notify("Phone not connected", "Open DroidLink on your phone.") }
         let panel = NSOpenPanel()
         NSApp.activate()
-        guard panel.runModal() == .OK, let url = panel.url, let data = try? Data(contentsOf: url) else { return }
-        guard data.count <= Link.maxFile else { return notify("File too big", "The limit is 50 MB.") }
-        link.send(["t": "file", "name": url.lastPathComponent, "data": data.base64EncodedString()])
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        send(file: url)
+    }
+
+    func send(file url: URL) {
+        transfers.send(file: url)
+    }
+
+    /// Overall progress next to the menu bar icon while anything is moving.
+    func showTransferProgress() {
+        let moving = transfers.items.filter(\.active)
+        let total = moving.reduce(Int64(0)) { $0 + $1.size }
+        let done = moving.reduce(Int64(0)) { $0 + $1.bytes }
+        let title = total > 0 ? " \(done * 100 / total)%" : ""
+        if item.button?.title != title { item.button?.title = title }
+    }
+
+    func transferFinished(_ t: Transfers.Item) {
+        // Staged share-extension copies are ours to delete, sent or not.
+        if !t.incoming, let url = t.url, url.path.hasPrefix(staging.path) {
+            try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
+        }
+        if let error = t.error {
+            notify("\(t.incoming ? "Receiving" : "Sending") \(t.name) failed", error)
+        } else if t.incoming {
+            notify("Received \(t.url?.lastPathComponent ?? t.name)", "Saved to Downloads", path: t.url?.path)
+        } else {
+            notify("Sent \(t.name) to your phone", ByteCountFormatter.string(fromByteCount: t.size, countStyle: .file))
+        }
+    }
+
+    /// The Share menu extension (ShareExtension) copies files here and opens droidlink://outbox. It's
+    /// sandboxed, so this is its container; we're not, so we can read and empty it.
+    let outbox = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent("Library/Containers/dev.droidlink.mac.share/Data/Library/Caches/Outbox")
+
+    func application(_ app: NSApplication, open urls: [URL]) {
+        guard urls.contains(where: { $0.scheme == "droidlink" }) else { return }
+        guard link.isConnected else {
+            // A share that just launched us: the phone connects in a moment and onState sends them.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 20) { [weak self] in
+                guard let self, !link.isConnected, !outboxFiles().isEmpty else { return }
+                notify("Phone not connected", "Shared files will go to the phone when it connects.")
+            }
+            return
+        }
+        sendOutbox()
+    }
+
+    func outboxFiles() -> [URL] {
+        let all = FileManager.default.enumerator(at: outbox, includingPropertiesForKeys: [.isRegularFileKey])?.allObjects as? [URL] ?? []
+        return all.filter { (try? $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true }
+    }
+
+    func sendOutbox() {
+        let files = outboxFiles()
+        guard !files.isEmpty else { return }
+        // Move each into its own staging folder (names may repeat): the transfer reads it later.
+        for file in files {
+            let dir = staging.appendingPathComponent(UUID().uuidString)
+            let dest = dir.appendingPathComponent(file.lastPathComponent)
+            do {
+                try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                try FileManager.default.moveItem(at: file, to: dest)
+                send(file: dest)
+            } catch {
+                notify("Couldn't send \(file.lastPathComponent)", error.localizedDescription)
+            }
+        }
+        try? FileManager.default.removeItem(at: outbox)
     }
 
     /// Android Studio's SDK first, then Homebrew's (installed alongside scrcpy).
