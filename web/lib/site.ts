@@ -25,9 +25,10 @@ export const KEYWORDS = [
  * Canonical origin for metadata, sitemap and robots. Set NEXT_PUBLIC_SITE_URL to the real domain;
  * on Vercel the production domain is picked up automatically.
  */
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000")
+).replace(/\/+$/, "") // "https://x.app/" would give "https://x.app//sitemap.xml"
 
 /** The questions people search for, answered on the page and in FAQPage structured data. */
 export const FAQ: [string, string][] = [
