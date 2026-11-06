@@ -12,5 +12,9 @@ android/local.properties
 *.apk
 *.jks
 *.keystore
+android/keystore.properties
 .idea/
 *.iml
+
+# Release builds (scripts/release.sh)
+dist/

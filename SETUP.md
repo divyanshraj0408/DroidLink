@@ -2,6 +2,22 @@
 
 Source: <https://github.com/divyanshraj0408/DroidLink>
 
+## Download (easiest)
+
+Get both apps from the [latest release](https://github.com/divyanshraj0408/DroidLink/releases/latest):
+
+- **Mac:** [DroidLink.dmg](https://github.com/divyanshraj0408/DroidLink/releases/latest/download/DroidLink.dmg)
+  (Apple silicon and Intel, macOS 14+). Open it, drag DroidLink into Applications and open it from there. The first
+  time, macOS says it can't verify the developer: open System Settings → Privacy & Security, scroll down and click
+  **Open Anyway**. The app isn't notarized by Apple, which is why that step is needed.
+- **Phone:** [DroidLink.apk](https://github.com/divyanshraj0408/DroidLink/releases/latest/download/DroidLink.apk)
+  (Android 14+). Open the link on the phone and open the downloaded file. Allow installs from your browser when Android
+  asks, then tap **Install**. If Play Protect warns about an unknown app, tap **More details → Install anyway**.
+
+Then [pair](#4-pair). Each release lists the files' SHA-256 checksums.
+
+## Build it yourself
+
 From nothing to a paired phone and Mac in about 15 minutes, most of it downloads. There are two ways:
 let an AI agent do it, or paste four blocks yourself.
 
@@ -147,3 +163,19 @@ DroidLink switches adb to Wi-Fi, so you can unplug afterwards. Repeat the USB st
   screenshots of that code; anyone who scans it can read and send messages as your phone.
 - The Mac port (47821) accepts connections from the network but drops anything that doesn't decrypt
   with your key.
+
+## Making a release (maintainers)
+
+```sh
+scripts/release.sh     # → dist/DroidLink.dmg, dist/DroidLink.apk, dist/SHA256SUMS.txt
+```
+
+Then create a release on GitHub (Releases → Draft a new release, tag such as `v1.0`) and attach all three files.
+The website's download buttons point at `releases/latest/download/DroidLink.dmg` and `.apk`, so they follow the
+newest release with no change to the site. Bump `versionCode`/`versionName` in `android/app/build.gradle.kts` and
+`CFBundleShortVersionString`/`CFBundleVersion` in `mac/Info.plist` for each release.
+
+The APK is signed with the key named in `android/keystore.properties` (git-ignored; it points at
+`~/.droidlink/release.jks`). **Back up both.** Android only installs an update over an app signed with the same key,
+so losing it means everyone has to uninstall and reinstall. Without the file, release builds fall back to the debug
+key, which is fine for building from source.

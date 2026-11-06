@@ -1,6 +1,9 @@
 // Plain module, not "use client": server components read these as values, not client references.
 export const REPO = "https://github.com/divyanshraj0408/DroidLink"
 export const SETUP_GUIDE = `${REPO}/blob/main/SETUP.md`
+// "latest/download" always points at the newest release's file of that name (scripts/release.sh).
+export const DMG_URL = `${REPO}/releases/latest/download/DroidLink.dmg`
+export const APK_URL = `${REPO}/releases/latest/download/DroidLink.apk`
 export const PHONE = "Nothing Phone (2a)"
 
 export const NAME = "DroidLink"
@@ -32,7 +35,7 @@ export const SITE_URL = (
 
 /** The questions people search for, answered on the page and in FAQPage structured data. */
 export const FAQ: [string, string][] = [
-  ["Is DroidLink free?", "Yes. It's free and open source, and there's no account, subscription or server: you build both apps from the code on GitHub."],
+  ["Is DroidLink free?", "Yes. It's free and open source, with no account, subscription or server. Download the Mac and Android apps from GitHub Releases, or build them yourself from the code."],
   ["Does it need the internet?", "No. Your phone and Mac talk directly over your Wi‑Fi, encrypted with AES‑256‑GCM. Nothing goes through a cloud service. With no shared Wi‑Fi, a USB cable works too."],
   ["Which phones and Macs does it work with?", "Android 14 or later, and macOS 14 Sonoma or later. It has been used day to day on a Nothing Phone (2a) Plus and works with any Android phone that allows SMS and notification access."],
   ["Is there a size limit on files?", "No. Files stream in encrypted 1 MiB chunks over their own connection, straight from disk to disk, with progress and Cancel on both sides and a SHA‑256 check at the end. A 20 GB video works the same way as a photo."],

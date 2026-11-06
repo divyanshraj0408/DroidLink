@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { Check, Copy } from "lucide-react"
-import { REPO, SETUP_GUIDE } from "@/lib/site"
+import { APK_URL, DMG_URL, REPO, SETUP_GUIDE } from "@/lib/site"
+import { TextureButton } from "@/components/ui/texture-button"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -69,13 +70,57 @@ echo "sdk.dir=$HOME/Library/Android/sdk" > android/local.properties
   },
 ]
 
+// Installing the release downloads; same steps as SETUP.md → Download.
+const INSTALL: { title: string; href?: string; button?: string; note: string }[] = [
+  {
+    title: "Install on your Mac",
+    href: DMG_URL,
+    button: "Download DroidLink.dmg",
+    note: "Open it, drag DroidLink into Applications and open it from there. The first time, macOS says it can’t verify the developer: open System Settings → Privacy & Security, scroll down and click Open Anyway. DroidLink appears in the menu bar with a pairing QR code.",
+  },
+  {
+    title: "Install on your phone",
+    href: APK_URL,
+    button: "Download DroidLink.apk",
+    note: "Open this page on your phone and tap the button, then open the downloaded file. Android asks to allow installs from your browser: allow it and tap Install. If Play Protect warns about an unknown app, tap More details → Install anyway.",
+  },
+  {
+    title: "Pair",
+    note: "On the phone, open DroidLink, tap Pair with a Mac and scan the code on the Mac. Allow the permissions it asks for until every row under On your Mac says On, then turn on Run in Background. When macOS asks, allow Local Network access and Notifications.",
+  },
+  {
+    title: "Check it works",
+    note: "Text yourself a message with a code in it: the code should land on your Mac’s clipboard. For phone camera and screen mirroring, also run brew install scrcpy.",
+  },
+]
+
 export function Setup() {
   return (
-    <Tabs defaultValue="hand" className="gap-6">
+    <Tabs defaultValue="download" className="gap-6">
       <TabsList>
-        <TabsTrigger value="hand">By hand</TabsTrigger>
+        <TabsTrigger value="download">Download</TabsTrigger>
+        <TabsTrigger value="hand">Build it yourself</TabsTrigger>
         <TabsTrigger value="agent">With an AI agent</TabsTrigger>
       </TabsList>
+
+      <TabsContent value="download" className="min-w-0">
+        <ol className="grid max-w-3xl grid-cols-[minmax(0,1fr)] gap-y-10">
+          {INSTALL.map((s, i) => (
+            <li key={s.title} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3">
+              <span className="font-heading text-2xl leading-7 text-muted-foreground tabular-nums">{i + 1}</span>
+              <div className="space-y-3">
+                <h3 className="text-base leading-7 font-semibold">{s.title}</h3>
+                {s.href && (
+                  <TextureButton href={s.href} className="w-auto">
+                    {s.button}
+                  </TextureButton>
+                )}
+                <p className="max-w-[68ch] text-[15px] leading-relaxed">{s.note}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </TabsContent>
 
       <TabsContent value="hand" className="min-w-0">
         <ol className="grid max-w-3xl grid-cols-[minmax(0,1fr)] gap-y-10">

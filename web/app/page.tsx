@@ -5,7 +5,7 @@ import { AppIcon, Chain } from "@/components/glyph"
 import { MenuBar } from "@/components/menu-bar"
 import { Reveals } from "@/components/reveals"
 import { Tile } from "@/components/devices"
-import { DESCRIPTION, FAQ, NAME, REPO, SETUP_GUIDE, SITE_URL } from "@/lib/site"
+import { APK_URL, DESCRIPTION, DMG_URL, FAQ, NAME, REPO, SETUP_GUIDE, SITE_URL } from "@/lib/site"
 import { Setup } from "@/components/setup"
 import { buttonVariants } from "@/components/ui/button"
 import { TextureButton } from "@/components/ui/texture-button"
@@ -33,7 +33,7 @@ const JSON_LD = [
     operatingSystem: "macOS 14 or later, Android 14 or later",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     isAccessibleForFree: true,
-    downloadUrl: REPO,
+    downloadUrl: [DMG_URL, APK_URL],
     sameAs: [REPO],
     author: { "@type": "Person", name: "Divyansh Raj", url: "https://github.com/divyanshraj0408" },
     featureList: [
@@ -135,12 +135,12 @@ export default function Home() {
             Set it up
           </h2>
           <p {...r(1)} className="mt-5 max-w-[60ch] text-lg leading-relaxed">
-            DroidLink is open source: you build both apps from the{" "}
+            Download the two apps and pair them, in about five minutes. You’ll need a Mac on macOS 14 or later and a phone on
+            Android 14 or later, on the same Wi‑Fi. Prefer to build from the{" "}
             <a href={REPO} className="underline underline-offset-4">
               code on GitHub
             </a>
-            , and the steps below install everything it needs. It takes about 15 minutes. You’ll need a Mac on macOS 14 or
-            later, a phone on Android 14 or later on the same Wi‑Fi, and a USB cable for the first install. The{" "}
+            ? That takes about 15 minutes and a USB cable. The{" "}
             <a href={SETUP_GUIDE} className="underline underline-offset-4">
               full guide
             </a>{" "}
@@ -201,14 +201,19 @@ function Hero() {
           texts, clipboard and files of any size move both ways.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a href="#setup" className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-[15px] transition-transform active:scale-[0.97]")}>
-            Set it up
-          </a>
-          <TextureButton href={REPO} size="lg" className="w-auto transition-transform active:scale-[0.97]">
-            View on GitHub
+          <TextureButton href={DMG_URL} size="lg" className="w-auto transition-transform active:scale-[0.97]">
+            Download for Mac
           </TextureButton>
+          <a href={APK_URL} className={cn(buttonVariants({ size: "lg", variant: "outline" }), "h-11 px-5 text-[15px] transition-transform active:scale-[0.97]")}>
+            Download for Android
+          </a>
         </div>
-        <p className="mt-5 text-sm text-muted-foreground">Free, open source, and nothing leaves your Wi‑Fi.</p>
+        <p className="mt-5 text-sm text-muted-foreground">
+          Free and open source, for macOS 14+ and Android 14+.{" "}
+          <a href="#setup" className="text-foreground underline underline-offset-4">
+            How to install
+          </a>
+        </p>
       </div>
       <OtpScene />
     </section>

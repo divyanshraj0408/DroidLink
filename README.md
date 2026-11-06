@@ -8,7 +8,9 @@ only travels inside the pairing QR code.
 
 ## Build
 
-Full walkthrough with prerequisites and troubleshooting: [SETUP.md](SETUP.md).
+**Download:** [DroidLink.dmg](https://github.com/divyanshraj0408/DroidLink/releases/latest/download/DroidLink.dmg) for the Mac and
+[DroidLink.apk](https://github.com/divyanshraj0408/DroidLink/releases/latest/download/DroidLink.apk) for the phone, then pair them.
+Full walkthrough with install steps, building from source and troubleshooting: [SETUP.md](SETUP.md).
 
 ```sh
 mac/build.sh                                  # → mac/build/DroidLink.app
