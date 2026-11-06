@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { AnimatePresence, motion } from "motion/react"
 import { Bluetooth, Copy, FileText, ImageIcon, MessageSquare } from "lucide-react"
 import { useBanners } from "@/components/banners"
@@ -32,12 +33,13 @@ export function FilesScene() {
   return (
     <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-center">
       <Phone label="Phone share sheet with a Send to Mac option">
-        <div className="relative h-full bg-gradient-to-br from-[#f6d365] via-[#fda085] to-[#5d4157]">
+        <div className="relative h-full">
+          <Image src="/photos/kedarnath-peak.jpg" alt="The photo being shared: a snow-covered peak above Kedarnath" fill sizes="272px" className="object-cover" />
           <div className="absolute inset-x-0 bottom-0 rounded-t-[22px] bg-[#f2f2f7] p-3 pb-4 text-[11px] text-black dark:bg-[#1c1c1e] dark:text-white">
             <div className="mx-auto mb-3 h-1 w-8 rounded-full bg-black/20 dark:bg-white/25" />
             <div className="flex items-center gap-2">
-              <span className="grid size-10 place-items-center rounded-lg bg-gradient-to-br from-[#fda085] to-[#5d4157] text-white">
-                <ImageIcon className="size-4" />
+              <span className="relative size-10 overflow-hidden rounded-lg">
+                <Image src="/photos/kedarnath-peak.jpg" alt="" fill sizes="40px" className="object-cover" />
               </span>
               <span>
                 <span className="block font-semibold">1 photo</span>

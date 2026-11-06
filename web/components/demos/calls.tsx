@@ -211,7 +211,7 @@ function CallScreen({ state, title, subtitle }: { state: State; title: string; s
     )
   }
   return (
-    <div className="flex h-full flex-col items-center bg-gradient-to-b from-[#2c3e50] to-[#111] px-4 pt-10 pb-8 text-white">
+    <div className="flex h-full flex-col items-center bg-[#1c2530] px-4 pt-10 pb-8 text-white">
       <Avatar name={title} size={64} />
       <p className="mt-3 text-[18px] font-medium">{title}</p>
       <p className="text-[11px] text-white/70 tabular-nums">{subtitle}</p>

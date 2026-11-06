@@ -22,7 +22,7 @@ export function AppIcon({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-grid shrink-0 place-items-center rounded-[22.5%] bg-gradient-to-b from-[#3a3a3c] to-[#1e1e20] shadow-[inset_0_0_0_0.5px_rgb(255_255_255/0.12),0_1px_2px_rgb(0_0_0/0.3)]",
+        "inline-grid shrink-0 place-items-center rounded-[22.5%] bg-gradient-to-b from-[#3a3a3c] to-[#1e1e20]",
         className
       )}
       aria-hidden

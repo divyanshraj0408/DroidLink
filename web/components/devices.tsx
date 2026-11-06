@@ -10,8 +10,9 @@ import { AppIcon } from "@/components/glyph"
 export function Phone({ children, overlay, className, label }: { children: ReactNode; overlay?: ReactNode; className?: string; label: string }) {
   return (
     <div
-      role="img"
+      role="group"
       aria-label={label}
+      data-ui
       className={cn("relative w-[272px] shrink-0 rounded-[46px] bg-[#0d0d0f] p-[9px] shadow-[0_30px_60px_-20px_rgb(0_0_0/0.45),inset_0_0_0_1.5px_#3a3a3e]", className)}
     >
       <div className="relative flex aspect-[9/19.5] flex-col overflow-hidden rounded-[38px] bg-[#f2f2f7] text-black dark:bg-black dark:text-white">
@@ -70,7 +71,7 @@ export function MacWindow({
   className?: string
 }) {
   return (
-    <div className={cn("overflow-hidden rounded-xl bg-card text-[13px] text-card-foreground shadow-[0_0_0_0.5px_rgb(0_0_0/0.25),0_24px_50px_-16px_rgb(0_0_0/0.35)]", className)}>
+    <div data-ui className={cn("overflow-hidden rounded-xl bg-card text-[13px] text-card-foreground shadow-[0_0_0_0.5px_rgb(0_0_0/0.25),0_24px_50px_-16px_rgb(0_0_0/0.35)]", className)}>
       <div className="flex h-10 items-center gap-3 border-b bg-muted/60 px-3.5">
         <span className="flex gap-2" aria-hidden>
           <span className="size-3 rounded-full bg-[#ff5f57]" />

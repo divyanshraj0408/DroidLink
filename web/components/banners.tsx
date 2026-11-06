@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react"
 import { AnimatePresence, MotionConfig, motion } from "motion/react"
-import { ArrowRight, ArrowUp } from "lucide-react"
+import { ArrowDown, ArrowRight, X } from "lucide-react"
 import { AppIcon } from "@/components/glyph"
 
 /** A macOS notification banner, as DroidLink posts them (App.swift notify()). */
@@ -26,7 +26,12 @@ type Ctx = {
   lastOtp: string | null
   setLastOtp: (code: string) => void
   recent: { line: string; text: string }[]
+  /** A file going to the phone: the menu bar shows its percentage and the menu a Cancel row. */
+  transfer: Transfer | null
+  setTransfer: (t: Transfer | null) => void
 }
+
+export type Transfer = { name: string; pct: number; waiting?: boolean; cancel: () => void }
 
 const BannerContext = createContext<Ctx | null>(null)
 
@@ -41,6 +46,7 @@ export function BannerProvider({ children }: { children: ReactNode }) {
   const [overlay, setOverlay] = useState<HTMLDivElement | null>(null)
   const [lastOtp, setLastOtp] = useState<string | null>(null)
   const [recent, setRecent] = useState<Ctx["recent"]>([])
+  const [transfer, setTransfer] = useState<Transfer | null>(null)
   const nextId = useRef(1)
 
   const dismiss = useCallback((id: number) => setBanners((bs) => bs.filter((b) => b.id !== id)), [])
@@ -54,12 +60,13 @@ export function BannerProvider({ children }: { children: ReactNode }) {
 
   return (
     <MotionConfig reducedMotion="user">
-      <BannerContext.Provider value={{ push, dismiss, overlay, lastOtp, setLastOtp, recent }}>
+      <BannerContext.Provider value={{ push, dismiss, overlay, lastOtp, setLastOtp, recent, transfer, setTransfer }}>
         {children}
         <div
           ref={setOverlay}
+          data-ui
           aria-live="polite"
-          className="pointer-events-none fixed top-9 right-2 left-2 z-40 flex flex-col items-end gap-2 sm:left-auto sm:w-[360px]"
+          className="pointer-events-none fixed right-2 bottom-2 left-2 z-40 flex flex-col items-end gap-2 sm:top-9 sm:bottom-auto sm:left-auto sm:w-[360px]"
         >
           <AnimatePresence initial={false}>
             {banners.map((b) => (
@@ -157,7 +164,7 @@ function BannerView({ banner, dismiss }: { banner: Banner; dismiss: (id: number)
         aria-label="Dismiss"
         className="absolute -top-1.5 -left-1.5 grid size-5 place-items-center rounded-full bg-card text-[11px] text-muted-foreground opacity-0 shadow ring-1 ring-foreground/10 transition-opacity focus-visible:opacity-100 [div:hover>&]:opacity-100"
       >
-        ✕
+        <X className="size-3" />
       </button>
     </motion.div>
   )
@@ -165,7 +172,7 @@ function BannerView({ banner, dismiss }: { banner: Banner; dismiss: (id: number)
 
 /**
  * A pulsing "do this" hint pointing at a banner or the call card, so visitors know the demo is live.
- * Left of the card on wider screens; under it on phones, where cards span the width.
+ * Left of the card on wider screens; above it on phones, where cards span the width at the bottom.
  */
 export function Coach({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -174,14 +181,14 @@ export function Coach({ children, className }: { children: ReactNode; className?
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.6 }}
-      className={`pointer-events-none absolute z-10 flex items-center whitespace-nowrap max-sm:top-full max-sm:right-4 max-sm:mt-2 sm:right-full sm:mr-3 ${className ?? ""}`}
+      className={`pointer-events-none absolute z-10 flex items-center whitespace-nowrap max-sm:bottom-full max-sm:right-4 max-sm:mb-2 sm:right-full sm:mr-3 ${className ?? ""}`}
     >
       <motion.span
         animate={{ x: [0, -5, 0], y: 0 }}
         transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
         className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg"
       >
-        <ArrowUp className="size-3.5 sm:hidden" />
+        <ArrowDown className="size-3.5 sm:hidden" />
         {children}
         <ArrowRight className="hidden size-3.5 sm:block" />
       </motion.span>

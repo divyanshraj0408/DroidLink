@@ -19,15 +19,16 @@ const LINKS = [
   ["Features", "#features"],
   ["Privacy", "#privacy"],
   ["Set up", "#setup"],
+  ["FAQ", "#faq"],
 ] as const
 
 /** The page's nav, drawn as the macOS menu bar with DroidLink's status item in it. */
 export function MenuBar() {
-  const { lastOtp, recent } = useBanners()
+  const { lastOtp, recent, transfer } = useBanners()
   const go = (hash: string) => document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" })
 
   return (
-    <header className="material sticky top-0 z-50 flex h-8 items-center gap-1 px-2 text-[13px] !shadow-[0_0.5px_0_var(--material-line)]">
+    <header className="material sticky top-0 z-50 flex h-8 items-center gap-1 px-4 text-[13px] !shadow-[0_0.5px_0_var(--material-line)]">
       <a href="#top" className="flex items-center gap-1.5 rounded px-2 py-0.5 font-bold hover:bg-foreground/10">
         <Chain className="size-3.5" />
         DroidLink
@@ -47,9 +48,10 @@ export function MenuBar() {
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label="DroidLink menu"
-            className="grid h-6 w-7 place-items-center rounded hover:bg-foreground/10 data-popup-open:bg-foreground/15 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            className="flex h-6 min-w-7 items-center justify-center gap-1 rounded px-1 tabular-nums hover:bg-foreground/10 data-popup-open:bg-foreground/15 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             <Chain className="size-4" />
+            {transfer && !transfer.waiting && <span>{transfer.pct}%</span>}
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
@@ -78,10 +80,18 @@ export function MenuBar() {
                 ))}
               </>
             )}
+            {transfer && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={transfer.cancel} className="text-[13px]">
+                  ↑ {transfer.name} — {transfer.waiting ? "waiting" : `${transfer.pct}%`} · Cancel
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => go("#messages")} className="text-[13px]">Messages…</DropdownMenuItem>
             <DropdownMenuItem onClick={() => go("#calls")} className="text-[13px]">Keypad…</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => go("#files")} className="text-[13px]">Send File to Phone…</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => go("#any-size")} className="text-[13px]">Send File to Phone…</DropdownMenuItem>
             <DropdownMenuItem onClick={() => go("#files")} className="text-[13px]">Phone Camera</DropdownMenuItem>
             <DropdownMenuItem onClick={() => go("#files")} className="text-[13px]">Mirror Phone Screen</DropdownMenuItem>
             <DropdownMenuSeparator />
