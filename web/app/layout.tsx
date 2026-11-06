@@ -33,6 +33,8 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
   },
   appleWebApp: { title: NAME, statusBarStyle: "black-translucent", capable: true },
+  // Google Search Console's "HTML tag" check: the content="…" value from the tag it gives you.
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
 }
 
 export const viewport: Viewport = {
