@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Bricolage_Grotesque } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { BannerProvider } from "@/components/banners"
 import { DESCRIPTION, KEYWORDS, NAME, SITE_URL, TITLE } from "@/lib/site"
@@ -56,6 +57,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <TooltipProvider>
           <BannerProvider>{children}</BannerProvider>
         </TooltipProvider>
+        {/* Vercel Web Analytics: page views, no cookies. Only reports on Vercel deployments. */}
+        <Analytics />
       </body>
     </html>
   )
